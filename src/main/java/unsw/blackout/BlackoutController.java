@@ -1,50 +1,76 @@
 package unsw.blackout;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import unsw.response.models.EntityInfoResponse;
+import unsw.response.models.FileInfoResponse;
 import unsw.utils.Angle;
+import unsw.utils.MathsHelper;
 
 public class BlackoutController {
-
+    // data structure to store device or satellites or both?
+    DataStorageStructure dataSS = new DataStorageStructure();
     public void createDevice(String deviceId, String type, Angle position) {
-        // TODO: Task 1a)
+        Device dev = new Device(deviceId, type, position);
+        dataSS.addDevice(dev);
     }
 
     public void removeDevice(String deviceId) {
-        // TODO: Task 1b)
+        dataSS.removeDeviceById(deviceId);
     }
 
     public void createSatellite(String satelliteId, String type, double height, Angle position) {
-        // TODO: Task 1c)
+        Satellite sat = new Satellite(satelliteId, type, height, position);
+        dataSS.addSatellite(sat);
     }
 
     public void removeSatellite(String satelliteId) {
-        // TODO: Task 1d)
+        dataSS.removeSatelliteById(satelliteId);
     }
 
     public List<String> listDeviceIds() {
-        // TODO: Task 1e)
-        return new ArrayList<>();
+        return dataSS.getDevices().stream().map(device -> device.getDeviceId()).collect(Collectors.toList());
     }
 
     public List<String> listSatelliteIds() {
-        // TODO: Task 1f)
-        return new ArrayList<>();
+        return dataSS.getSatellites().stream().map(satellite -> satellite.getSatelliteId()).collect(Collectors.toList());
     }
 
     public void addFileToDevice(String deviceId, String filename, String content) {
-        // TODO: Task 1g)
+        dataSS.addFileToDevice(deviceId, filename, content);
     }
 
     public EntityInfoResponse getInfo(String id) {
-        // TODO: Task 1h)
-        return null;
+        Satellite sat = dataSS.getSatelliteById(id);
+        Device dev = dataSS.getDeviceById(id);
+        if (sat != null) {
+            return new EntityInfoResponse(sat.getSatelliteId(),
+                                            sat.getPosition(),
+                                            sat.getHeight(),
+                                            sat.getType());
+        } else {
+            Map<String, FileInfoResponse> files = new HashMap<>();
+            dev.getFiles().stream().forEach(file -> files.put(file.getFilename(),
+                                            new FileInfoResponse(file.getFilename(),
+                                                                    file.getContent(),
+                                                                    file.getFileSize(),
+                                                                    true)));
+            return new EntityInfoResponse(dev.getDeviceId(),
+                                            dev.getPosition(),
+                                            MathsHelper.RADIUS_OF_JUPITER,
+                                            dev.getType(),
+                                            files);
+        }
     }
 
     public void simulate() {
         // TODO: Task 2a)
+        //This should run the simulation for a single minute.
+        // This will include moving satellites around and later on transferring files between satellites and devices.
     }
 
     /**
