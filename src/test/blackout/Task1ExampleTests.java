@@ -136,7 +136,7 @@ public class Task1ExampleTests {
     public void testEntityInfoResponseWithSatellite() {
         BlackoutController controller = new BlackoutController();
         controller.createSatellite("Satellite1", "StandardSatellite", 100 + RADIUS_OF_JUPITER, Angle.fromDegrees(340));
-        controller.createSatellite("Satellite2", "StandardSatellite", 130 + RADIUS_OF_JUPITER, Angle.fromDegrees(300));
-        assertEquals(new EntityInfoResponse("Satellite2", Angle.fromDegrees(300), 130 + RADIUS_OF_JUPITER, "StandardSatellite"), controller.getInfo("Satellite2"));
+        controller.createSatellite("Satellite2", "TeleportingSatellite", 130 + RADIUS_OF_JUPITER, Angle.fromDegrees(300));
+        assertEquals(new EntityInfoResponse("Satellite2", Angle.fromDegrees(300), 130 + RADIUS_OF_JUPITER, "TeleportingSatellite"), controller.getInfo("Satellite2"));
     }
 }

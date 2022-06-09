@@ -15,8 +15,20 @@ public class BlackoutController {
     // data structure to store device or satellites or both?
     DataStorageStructure dataSS = new DataStorageStructure();
     public void createDevice(String deviceId, String type, Angle position) {
-        Device dev = new Device(deviceId, type, position);
-        dataSS.addDevice(dev);
+        switch (type) {
+            case ("DesktopDevice") : {
+                dataSS.addDevice(new DesktopDevice(deviceId, position));
+                break;
+            }
+            case ("LaptopDevice") : {
+                dataSS.addDevice(new LaptopDevice(deviceId, position));
+                break;
+            }
+            case ("HandheldDevice") : {
+                dataSS.addDevice(new HandheldDevice(deviceId, position));
+                break;
+            }
+        }
     }
 
     public void removeDevice(String deviceId) {
@@ -24,8 +36,20 @@ public class BlackoutController {
     }
 
     public void createSatellite(String satelliteId, String type, double height, Angle position) {
-        Satellite sat = new Satellite(satelliteId, type, height, position);
-        dataSS.addSatellite(sat);
+        switch (type) {
+            case ("StandardSatellite") : {
+                dataSS.addSatellite(new StandardSatellite(satelliteId, height, position));
+                break;
+            }
+            case ("TeleportingSatellite") : {
+                dataSS.addSatellite(new TeleportingSatellite(satelliteId, height, position));
+                break;
+            }
+            case ("RelaySatellite") : {
+                dataSS.addSatellite(new RelaySatellite(satelliteId, height, position));
+                break;
+            }
+        }
     }
 
     public void removeSatellite(String satelliteId) {
