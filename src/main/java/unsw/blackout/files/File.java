@@ -1,14 +1,16 @@
-package unsw.blackout;
+package unsw.blackout.files;
 
 import java.util.Objects;
 
 public class File {
     private String filename;
     private String content;
+    private boolean isTransferred;
 
-    public File(String filename, String content) {
+    public File(String filename, String content, boolean isTransferred) {
         this.filename = filename;
         this.content = content;
+        this.isTransferred = isTransferred;
     }
 
     public String getFilename() {
@@ -21,6 +23,14 @@ public class File {
 
     public int getFileSize() {
         return content.length();
+    }
+
+    public boolean getIsTransferred() {
+        return isTransferred;
+    }
+
+    public void setIsTransferred(boolean transferred) {
+        isTransferred = transferred;
     }
 
     @Override

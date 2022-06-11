@@ -1,11 +1,13 @@
 package unsw.blackout;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
+import unsw.blackout.devices.DesktopDevice;
+import unsw.blackout.devices.Device;
+import unsw.blackout.devices.HandheldDevice;
+import unsw.blackout.devices.LaptopDevice;
+import unsw.blackout.satellites.*;
 import unsw.response.models.EntityInfoResponse;
 import unsw.response.models.FileInfoResponse;
 import unsw.utils.Angle;
@@ -82,7 +84,7 @@ public class BlackoutController {
                                             new FileInfoResponse(file.getFilename(),
                                                                     file.getContent(),
                                                                     file.getFileSize(),
-                                                                    true)));
+                                                                    file.getIsTransferred())));
             return new EntityInfoResponse(dev.getDeviceId(),
                                             dev.getPosition(),
                                             MathsHelper.RADIUS_OF_JUPITER,
@@ -94,7 +96,8 @@ public class BlackoutController {
     public void simulate() {
         // TODO: Task 2a)
         //This should run the simulation for a single minute.
-        // This will include moving satellites around and later on transferring files between satellites and devices.
+        // This will include moving satellites around and later on transferring files between satellites and devices.dataSS.getSatellites();
+        dataSS.getSatellites().forEach(satellite -> satellite.move());
     }
 
     /**
@@ -108,8 +111,30 @@ public class BlackoutController {
     }
 
     public List<String> communicableEntitiesInRange(String id) {
-        // TODO: Task 2 b)
-        return new ArrayList<>();
+        Satellite satellite = dataSS.getSatelliteById(id);
+        Device device = dataSS.getDeviceById(id);
+        if (satellite != null) {
+            var communicable = satellite.getAllCommunicableEntities(dataSS.getSatellites(), dataSS.getDevices());
+            var communicableAsList = communicable.satellites
+                    .stream()
+                    .map(mySatellite -> mySatellite.getSatelliteId())
+                    .collect(Collectors.toList());
+            communicableAsList.addAll(
+                    communicable.devices
+                            .stream()
+                            .map(myDevice -> myDevice.getDeviceId())
+                            .collect(Collectors.toList())
+            );
+            return communicableAsList;
+        } else {
+            // No need to print out devices as devices cannot connect to other devices no matter what
+            var communicable = device.getAllCommunicableEntities(dataSS.getSatellites(), dataSS.getDevices());
+            var communicableAsList = communicable.satellites
+                    .stream()
+                    .map(mySatellite -> mySatellite.getSatelliteId())
+                    .collect(Collectors.toList());
+            return communicableAsList;
+        }
     }
 
     public void sendFile(String fileName, String fromId, String toId) throws FileTransferException {

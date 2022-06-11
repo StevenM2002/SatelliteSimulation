@@ -1,21 +1,27 @@
-package unsw.blackout;
+package unsw.blackout.devices;
 
+import unsw.blackout.files.File;
+import unsw.blackout.satellites.Satellite;
+import unsw.blackout.satellites.SatellitesAndDevices;
 import unsw.utils.Angle;
 
 import java.util.ArrayList;
 import java.util.Objects;
 
-public class Device {
+public abstract class Device {
 
     private String deviceId;
     private String type;
     private Angle position;
+    private int maxRange;
     private ArrayList<File> files = new ArrayList<>();
+    private ArrayList<File> untransferredFiles = new ArrayList<>();
 
-    public Device(String deviceId, String type, Angle position) {
+    public Device(String deviceId, String type, Angle position, int maxRange) {
         this.deviceId = deviceId;
         this.type = type;
         this.position = position;
+        this.maxRange = maxRange;
     }
     public String getDeviceId() {
         return deviceId;
@@ -33,6 +39,10 @@ public class Device {
         return files;
     }
 
+    public int getMaxRange() {
+        return maxRange;
+    }
+    public abstract SatellitesAndDevices getAllCommunicableEntities(ArrayList<Satellite> satellites, ArrayList<Device> devices);
     /**
      * Adds a file to the storage
      * @param file

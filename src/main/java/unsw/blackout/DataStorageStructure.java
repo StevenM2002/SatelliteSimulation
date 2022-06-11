@@ -1,7 +1,10 @@
 package unsw.blackout;
 
+import unsw.blackout.devices.Device;
+import unsw.blackout.files.File;
+import unsw.blackout.satellites.Satellite;
+
 import java.util.ArrayList;
-import java.util.stream.Collectors;
 
 public class DataStorageStructure {
     private ArrayList<Device> devices = new ArrayList<>();
@@ -57,7 +60,7 @@ public class DataStorageStructure {
     public void addFileToDevice(String deviceId, String filename, String content) {
         Device device = this.getDeviceById(deviceId);
         if (device == null) return;
-        device.addFile(new File(filename, content));
+        device.addFile(new File(filename, content, true));
     }
 
     /**

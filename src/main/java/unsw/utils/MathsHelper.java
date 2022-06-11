@@ -13,7 +13,8 @@ public final class MathsHelper {
     // 2022T2: change default direction to closewise and closkwise is -1
     public static final int CLOCKWISE = -1;
     public static final int ANTI_CLOCKWISE = 1;
-
+    public static final int NEGATIVE_DIRECTION = CLOCKWISE;
+    public static final int POSITIVE_DIRECTION = ANTI_CLOCKWISE;
     /**
      * Determine the distance between a satellite and another satellite.
      */

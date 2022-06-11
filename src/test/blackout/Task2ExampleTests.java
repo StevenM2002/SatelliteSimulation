@@ -16,12 +16,49 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static unsw.utils.MathsHelper.RADIUS_OF_JUPITER;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import static blackout.TestHelpers.assertListAreEqualIgnoringOrder;
 
 @TestInstance(value = Lifecycle.PER_CLASS)
 public class Task2ExampleTests {
+    @Test
+    public void testDesktopDeviceToAllSatelliteTypes() {
+        var controller = new BlackoutController();
+        controller.createSatellite("S1", "StandardSatellite", 75186, Angle.fromDegrees(91));
+        controller.createSatellite("S2", "TeleportingSatellite", 75415, Angle.fromDegrees(82));
+        controller.createSatellite("S3", "RelaySatellite", 74560, Angle.fromDegrees(102));
+        controller.createDevice("D1", "DesktopDevice", Angle.fromDegrees(92));
+        controller.createDevice("D2", "DesktopDevice", Angle.fromDegrees(102));
+        assertListAreEqualIgnoringOrder(Arrays.asList("S2", "S3"), controller.communicableEntitiesInRange("D1"));
+        assertListAreEqualIgnoringOrder(Arrays.asList("S2", "S3"), controller.communicableEntitiesInRange("D2"));
+        assertListAreEqualIgnoringOrder(Arrays.asList("S2", "S3"), controller.communicableEntitiesInRange("S1"));
+        assertListAreEqualIgnoringOrder(Arrays.asList("D1", "D2", "S1", "S2"), controller.communicableEntitiesInRange("S3"));
+        assertListAreEqualIgnoringOrder(Arrays.asList("D1", "D2", "S1", "S3"), controller.communicableEntitiesInRange("S2"));
+    }
+
+    @Test
+    public void testRelayEntitiesInRange() {
+        var controller = new BlackoutController();
+        controller.createSatellite("S1", "RelaySatellite", 74664, Angle.fromDegrees(167));
+        controller.createSatellite("S2", "RelaySatellite", 75486, Angle.fromDegrees(149));
+        controller.createSatellite("S3", "RelaySatellite", 79306, Angle.fromDegrees(116));
+        controller.createSatellite("S4", "RelaySatellite", 80755, Angle.fromDegrees(84));
+        controller.createSatellite("S5", "RelaySatellite", 81691, Angle.fromDegrees(52));
+        controller.createSatellite("S6", "RelaySatellite", 77086, Angle.fromDegrees(25));
+        controller.createSatellite("S7", "RelaySatellite", 74029, Angle.fromDegrees(8));
+        // Satellite 1 will not communicate with satellite 8 but will with all other satellites
+        controller.createSatellite("S8", "RelaySatellite", 73366, Angle.fromDegrees(270));
+        controller.createDevice("D1", "HandheldDevice", Angle.fromDegrees(0));
+        // Following is not communicable device except to S8
+        controller.createDevice("D2", "HandheldDevice", Angle.fromDegrees(260));
+        assertListAreEqualIgnoringOrder(Arrays.asList("S2", "S3", "S4", "S5", "S6", "S7", "D1"), controller.communicableEntitiesInRange("S1"));
+        assertListAreEqualIgnoringOrder(Arrays.asList("S1", "S2", "S3", "S4", "S5", "S6", "S7"), controller.communicableEntitiesInRange("D1"));
+        assertListAreEqualIgnoringOrder(Arrays.asList("S8"), controller.communicableEntitiesInRange("D2"));
+        assertListAreEqualIgnoringOrder(Arrays.asList("D2"), controller.communicableEntitiesInRange("S8"));
+    }
+
     @Test
     public void testEntitiesInRange() {
         // Task 2
@@ -154,10 +191,10 @@ public class Task2ExampleTests {
                         "RelaySatellite"), controller.getInfo("Satellite1"));
         // coming back
         controller.simulate(1);
-        assertEquals(new EntityInfoResponse("Satellite1", Angle.fromDegrees(140.74), 100 + RADIUS_OF_JUPITER,
+        assertEquals(new EntityInfoResponse("Satellite1", Angle.fromDegrees(140.72), 100 + RADIUS_OF_JUPITER,
                         "RelaySatellite"), controller.getInfo("Satellite1"));
         controller.simulate(5);
-        assertEquals(new EntityInfoResponse("Satellite1", Angle.fromDegrees(146.85), 100 + RADIUS_OF_JUPITER,
+        assertEquals(new EntityInfoResponse("Satellite1", Angle.fromDegrees(146.87), 100 + RADIUS_OF_JUPITER,
                         "RelaySatellite"), controller.getInfo("Satellite1"));
     }
 
