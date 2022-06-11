@@ -12,6 +12,12 @@
 
 - Tue 7 Jun 10pm: Fix note about direction of device creation position, and specify Moving Devices move anticlockwise
 - Thu 9 Jun 11am: Clarify teleporting satellite teleport mid-transfer rules + stacking slopes for first case
+- Fri 10 Jun 5pm:
+  - Clarify correction on teleporting satellite
+  - Clarify satellite to satellite teleport mid-transfer rules
+  - Update stale comment in Task 2 Example `testRelayMovement`
+  - Fix rounding issue in Task 2 Example `testRelayMovement`
+- Sun 12 Jun 9am: Fix further stale comments on satellite direction in spec and simple example
 
 ## 1. Aims
 
@@ -41,7 +47,7 @@ Let’s assume initially there is a `Standard Satellite` at height approximately
 
 In this system, the satellite can talk to Device A and Device A can talk to the satellite (communication is done by sending files) since they are in range of each other. Satellite A however cannot talk to Device B (and Device B cannot talk to Satellite A) because `Standard Satellite`s have restrictions on what devices they can talk to (discussed in more detail later). Finally, Satellite A cannot connect to Device C because it is not in visible sight range. The red line in the image highlights this.
 
-Devices are static and will not move, but satellites can! Satellites move based on a constant linear velocity, in this case Standard Satellites have a linear velocity of 2,500 km per minute (or 2,500,000 metres). From this, we can calculate its angular velocity based on its height (which is the radius from the center of Jupiter). For example, after 10 minutes it would have moved a total of `2,500 / 80,000 * 10 mins = 0.03125 * 10 = 0.3125 radians ~= 18 degrees` (note that we don't have to account for the fact they are measured in `km` here since the extra `10^3` component will cancel out). This means our new position is `18 + 128` which is approximately `145-146 degrees`.
+Devices are static and will not move, but satellites can! Satellites move based on a constant linear velocity, in this case Standard Satellites have a linear velocity of 2,500 km per minute (or 2,500,000 metres). From this, we can calculate its angular velocity based on its height (which is the radius from the center of Jupiter). For example, after 10 minutes it would have moved a total of `2,500 / 80,000 * 10 mins = 0.03125 * 10 = 0.3125 radians ~= 18 degrees` (note that we don't have to account for the fact they are measured in `km` here since the extra `10^3` component will cancel out). This means our new position is `128 - 18` which is approximately `110-111 degrees`.
 
 <img alt="A simple example" src="imgs/simpleExample2.png"  width="50%" height="50%">
 
@@ -148,8 +154,9 @@ Default direction for all satellites is negative (clockwise), unless otherwise s
   - Can receive 15 bytes per minute and can send 10 bytes per minute.
   - Can store up to 200 bytes and as many files as fits into that space.
   - When the position of the satellite reaches θ = 180, the satellite teleports to θ = 0 and changes direction.
-  - If a file transfer **from a satellite to a device** is in progress when the satellite teleports, the rest of the file is instantly downloaded, however all `"t"` bytes are removed from the remaining bytes to be sent.
+  - If a file transfer **from a satellite to a device or a satellite to another satellite** is in progress when the satellite teleports, the rest of the file is instantly downloaded, however all `"t"` bytes are removed from the remaining bytes to be sent.
   - If a file transfer **from a device to a satellite** is in progress when the satellite teleports, the download fails and the partially uploaded file is removed from the satellite, *and* all `"t"` bytes are removed from the file on the device.
+  - There is no 'correction' with the position after a teleport occurs as there is for Relay Satellites (see below). Once the satellite teleports to θ = 0 it does not continue moving for the remainder of the tick.
   - Teleporting satellites start by moving anticlockwise.
 - `RelaySatellite`
   - Moves at a linear velocity of 1,500 kilometres (1,500,000 metres) per minute
@@ -656,7 +663,7 @@ There will only be one test that contains overlapping slopes, so consider it an 
   - Most angles are given as radians.
 - All device ids are alphanumeric i.e. they consist of just alphabet characters and digits i.e. `A-Z`, `a-z`, `0-9`, or ` `.
 - All floating point (double) values only have to be accurate to a precision of 0.01. i.e. `3.33` and `3.34` are both 'equal' in any test we'll be running. You do _NOT_ need to worry about rounding/formatting them in your code. We'll design test cases such that floating point accuracy issues aren't a problem.
-- All satellites travel clockwise (exception being Relay Satellites which can travel in both directions, and Teleporting Satellites which begin by travelling anticlockwise) angles are measured from the x-axis, so this means their angle should 'increase' over time.
+- All satellites travel clockwise (exception being Relay Satellites which can travel in both directions, and Teleporting Satellites which begin by travelling anticlockwise) angles are measured from the x-axis, so this means their angle should 'decrease' over time.
   - You should ONLY refer to positions in the range `[0, 360)` that is any value that is any value `>= 360` or `< 0` should be wrapped back around i.e. 360 = 0, 361 = 1, 390 = 30, 720 = 0, -1 = 359, -360 = 0...
 - You may use any of the following Java libraries:
   - `java.io`
