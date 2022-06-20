@@ -231,8 +231,8 @@ public class Task2ExampleTests {
         controller.createSatellite("Satellite1", "TeleportingSatellite", 10000 + RADIUS_OF_JUPITER,
                 Angle.fromDegrees(0));
 
-        // Satellite position should increase if going clockwise (except from 360 -> 0)
-        // Verify that Satellite1 is going in a clockwise direction (default)
+        // Satellite position should increase if going anticlockwise (except from 360 -> 0)
+        // Verify that Satellite1 is going in a anticlockwise direction (default)
         controller.simulate();
         Angle clockwiseOnFirstMovement = controller.getInfo("Satellite1").getPosition();
         controller.simulate();
