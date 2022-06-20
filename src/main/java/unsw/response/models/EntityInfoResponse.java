@@ -8,15 +8,14 @@ import unsw.utils.Angle;
 
 /**
  * Represents a generic response for entity information.
- * 
- * @note You can't store this class in BlackoutController and should just create
- *       it when needed, using this will make you lose marks for design
- *       modelling. (it's an okay start, but there is much more work to be
- *       done).
- * 
- *       You shouldn't modify this file.
- * 
+ *
  * @author Braedon Wooding
+ * @note You can't store this class in BlackoutController and should just create
+ * it when needed, using this will make you lose marks for design
+ * modelling. (it's an okay start, but there is much more work to be
+ * done).
+ * <p>
+ * You shouldn't modify this file.
  */
 public final class EntityInfoResponse {
     private final String id;

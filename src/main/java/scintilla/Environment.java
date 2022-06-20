@@ -10,8 +10,8 @@ public class Environment {
 
     public synchronized final static String getIPAddress() {
         return (IPAddress == null && (IPAddress = System.getenv(PREFIX + "ADDRESS")) == null)
-            ? IPAddress = "0.0.0.0"
-            : IPAddress;
+                ? IPAddress = "0.0.0.0"
+                : IPAddress;
     }
 
     public synchronized final static int getPort() {
@@ -22,7 +22,7 @@ public class Environment {
             return Port = 4567;
         }
     }
-    
+
     public synchronized final static boolean isHeadless() {
         return IsHeadless != null ? IsHeadless.booleanValue() : (IsHeadless = (System.getenv(PREFIX + "HEADLESS") != null));
     }

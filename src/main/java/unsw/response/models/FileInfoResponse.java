@@ -5,15 +5,14 @@ import java.util.Objects;
 /**
  * Represents a file that is currently being transferred
  * or has been transferred to a device.
- * 
- * @note You can't store this class in BlackoutController and should just create
- *       it when needed, using this will make you lose marks for design
- *       modelling. (it's an okay start, but there is much more work to be
- *       done).
- * 
- *       You shouldn't modify this file.
- * 
+ *
  * @author Braedon Wooding
+ * @note You can't store this class in BlackoutController and should just create
+ * it when needed, using this will make you lose marks for design
+ * modelling. (it's an okay start, but there is much more work to be
+ * done).
+ * <p>
+ * You shouldn't modify this file.
  */
 public final class FileInfoResponse {
     /**
@@ -35,7 +34,7 @@ public final class FileInfoResponse {
      * Has transfer for this file been completed yet?
      */
     private final boolean hasTransferCompleted;
-    
+
     public FileInfoResponse(String filename, String data, int fileSize, boolean hasTransferCompleted) {
         this.filename = filename;
         this.data = data;

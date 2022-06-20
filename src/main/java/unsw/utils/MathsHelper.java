@@ -3,9 +3,9 @@ package unsw.utils;
 /**
  * Represents some generic methods to handle most of the complicated
  * math for you.
- * 
+ * <p>
  * You shouldn't modify this file.
- * 
+ *
  * @author Braedon Wooding
  */
 public final class MathsHelper {
@@ -15,11 +15,12 @@ public final class MathsHelper {
     public static final int ANTI_CLOCKWISE = 1;
     public static final int NEGATIVE_DIRECTION = CLOCKWISE;
     public static final int POSITIVE_DIRECTION = ANTI_CLOCKWISE;
+
     /**
      * Determine the distance between a satellite and another satellite.
      */
     public static double getDistance(double satelliteHeight, Angle satelliteAngle, double otherHeight,
-            Angle otherAngle) {
+                                     Angle otherAngle) {
         // convert to euclidean
         double satX = Math.cos(satelliteAngle.toRadians()) * satelliteHeight,
                 satY = Math.sin(satelliteAngle.toRadians()) * satelliteHeight;
@@ -49,7 +50,7 @@ public final class MathsHelper {
      * Determine if a satellite is visible to another satellite.
      */
     public static boolean isVisible(double satelliteHeight, Angle satelliteAngle, double otherHeight,
-            Angle otherAngle) {
+                                    Angle otherAngle) {
         // convert to euclidean
         double satX = Math.cos(satelliteAngle.toRadians()) * satelliteHeight,
                 satY = Math.sin(satelliteAngle.toRadians()) * satelliteHeight;
@@ -67,20 +68,20 @@ public final class MathsHelper {
          * - Let A = (ax, ay), B = (bx, by) be the points on our line segment
          * - Our cicle C is presumed to be (0, 0) (i.e. centred)
          * - Giving us points of x + y = RADIUS_OF_JUPITER^2
-         * 
+         *
          * We can then interpolate over the reals for t \in [0, 1] stating that
          * all points on the line must be A + t(B - A).
-         * 
+         *
          * Points of intersection must satisfy both points at the same time.
          * that is splitting the equations into components and then placing the
          * result into the circle equation.
-         * 
+         *
          * x = ax + t(bx - ax)
          * y = ay + t(by - ay)
-         * 
+         *
          * (placing result into circle equation)
          * (ax + t(bx - ax))^2 + (ay + t(by - ay))^2 = RADIUS_OF_JUPITER^2
-         * 
+         *
          * expanding...
          * t^2[(bx - ax)^2 + (by - ay)^2] + 2t[ax(bx - ax) + ay(by - ay)] + (ax^2 + ay^2
          * - RADIUS_OF_JUPITER^2) = 0
@@ -89,10 +90,10 @@ public final class MathsHelper {
          * 'over the *REALS* for t \in [0, 1]'. That is we can determine that indeed t
          * is real
          * and then after that validate it is within [0, 1].
-         * 
+         *
          * Determinant is b^2 - 4ac, and to ensure t is real this just has to be
          * positive.
-         * 
+         *
          * ... f u n
          */
         // renaming variables to match equations

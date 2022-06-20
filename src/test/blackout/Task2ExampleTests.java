@@ -6,6 +6,8 @@ import org.junit.jupiter.api.TestInstance.Lifecycle;
 
 import unsw.blackout.BlackoutController;
 import unsw.blackout.FileTransferException;
+import unsw.blackout.satellites.StandardSatellite;
+import unsw.blackout.satellites.TeleportingSatellite;
 import unsw.response.models.FileInfoResponse;
 import unsw.response.models.EntityInfoResponse;
 import unsw.utils.Angle;
@@ -14,6 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static unsw.utils.MathsHelper.NEGATIVE_DIRECTION;
 import static unsw.utils.MathsHelper.RADIUS_OF_JUPITER;
 
 import java.util.ArrayList;
@@ -24,7 +27,29 @@ import static blackout.TestHelpers.assertListAreEqualIgnoringOrder;
 @TestInstance(value = Lifecycle.PER_CLASS)
 public class Task2ExampleTests {
     @Test
-    public void testDesktopDeviceToAllSatelliteTypes() {
+    public void testAllDeviceTypesToAllSatelliteTypesCommunicable() {
+        var controller = new BlackoutController();
+        controller.createSatellite("S1", "StandardSatellite", 73787, Angle.fromDegrees(118));
+        controller.createSatellite("S2", "RelaySatellite", 75635, Angle.fromDegrees(88));
+        controller.createSatellite("S3", "TeleportingSatellite", 74404, Angle.fromDegrees(69));
+        controller.createSatellite("S4", "TeleportingSatellite", 76051, Angle.fromDegrees(103));
+        controller.createDevice("D1", "HandheldDevice", Angle.fromDegrees(108));
+        controller.createDevice("D2", "LaptopDevice", Angle.fromDegrees(87));
+        controller.createDevice("D3", "DesktopDevice", Angle.fromDegrees(64));
+        assertListAreEqualIgnoringOrder(Arrays.asList("S2", "S3", "S4", "D1", "D2"), controller.communicableEntitiesInRange("S1"));
+        assertListAreEqualIgnoringOrder(Arrays.asList("S1", "S3", "S4", "D1", "D2", "D3"), controller.communicableEntitiesInRange("S2"));
+        assertListAreEqualIgnoringOrder(Arrays.asList("S1", "S2", "S4", "D1", "D2", "D3"), controller.communicableEntitiesInRange("S3"));
+        assertListAreEqualIgnoringOrder(Arrays.asList("S1", "S2", "S3", "D1", "D2", "D3"), controller.communicableEntitiesInRange("S4"));
+        assertListAreEqualIgnoringOrder(Arrays.asList("S1", "S2", "S3", "S4"), controller.communicableEntitiesInRange("D1"));
+        assertListAreEqualIgnoringOrder(Arrays.asList("S1", "S2", "S3", "S4"), controller.communicableEntitiesInRange("D2"));
+        assertListAreEqualIgnoringOrder(Arrays.asList("S2", "S3", "S4"), controller.communicableEntitiesInRange("D3"));
+        // Testing lone relay satellite
+        controller.createSatellite("S5", "RelaySatellite", 104532, Angle.fromDegrees(359));
+        assertListAreEqualIgnoringOrder(Arrays.asList(), controller.communicableEntitiesInRange("S5"));
+    }
+
+    @Test
+    public void testDesktopDeviceToAllSatelliteTypesCommunicable() {
         var controller = new BlackoutController();
         controller.createSatellite("S1", "StandardSatellite", 75186, Angle.fromDegrees(91));
         controller.createSatellite("S2", "TeleportingSatellite", 75415, Angle.fromDegrees(82));
@@ -162,40 +187,40 @@ public class Task2ExampleTests {
         // Gets a device to send a file to a satellites and gets another device to download it.
         // StandardSatellites are slow and transfer 1 byte per minute.
         controller.createSatellite("Satellite1", "RelaySatellite", 100 + RADIUS_OF_JUPITER,
-                                Angle.fromDegrees(180));
+                Angle.fromDegrees(180));
 
         // moves in negative direction
         assertEquals(
-                        new EntityInfoResponse("Satellite1", Angle.fromDegrees(180), 100 + RADIUS_OF_JUPITER,
-                                        "RelaySatellite"),
-                        controller.getInfo("Satellite1"));
+                new EntityInfoResponse("Satellite1", Angle.fromDegrees(180), 100 + RADIUS_OF_JUPITER,
+                        "RelaySatellite"),
+                controller.getInfo("Satellite1"));
         controller.simulate();
         assertEquals(new EntityInfoResponse("Satellite1", Angle.fromDegrees(178.77), 100 + RADIUS_OF_JUPITER,
-                        "RelaySatellite"), controller.getInfo("Satellite1"));
+                "RelaySatellite"), controller.getInfo("Satellite1"));
         controller.simulate();
         assertEquals(new EntityInfoResponse("Satellite1", Angle.fromDegrees(177.54), 100 + RADIUS_OF_JUPITER,
-                        "RelaySatellite"), controller.getInfo("Satellite1"));
+                "RelaySatellite"), controller.getInfo("Satellite1"));
         controller.simulate();
         assertEquals(new EntityInfoResponse("Satellite1", Angle.fromDegrees(176.31), 100 + RADIUS_OF_JUPITER,
-                        "RelaySatellite"), controller.getInfo("Satellite1"));
+                "RelaySatellite"), controller.getInfo("Satellite1"));
 
         controller.simulate(5);
         assertEquals(new EntityInfoResponse("Satellite1", Angle.fromDegrees(170.18), 100 + RADIUS_OF_JUPITER,
-                        "RelaySatellite"), controller.getInfo("Satellite1"));
+                "RelaySatellite"), controller.getInfo("Satellite1"));
         controller.simulate(24);
         assertEquals(new EntityInfoResponse("Satellite1", Angle.fromDegrees(140.72), 100 + RADIUS_OF_JUPITER,
-                        "RelaySatellite"), controller.getInfo("Satellite1"));
+                "RelaySatellite"), controller.getInfo("Satellite1"));
         // edge case
         controller.simulate();
         assertEquals(new EntityInfoResponse("Satellite1", Angle.fromDegrees(139.49), 100 + RADIUS_OF_JUPITER,
-                        "RelaySatellite"), controller.getInfo("Satellite1"));
+                "RelaySatellite"), controller.getInfo("Satellite1"));
         // coming back
         controller.simulate(1);
         assertEquals(new EntityInfoResponse("Satellite1", Angle.fromDegrees(140.72), 100 + RADIUS_OF_JUPITER,
-                        "RelaySatellite"), controller.getInfo("Satellite1"));
+                "RelaySatellite"), controller.getInfo("Satellite1"));
         controller.simulate(5);
         assertEquals(new EntityInfoResponse("Satellite1", Angle.fromDegrees(146.87), 100 + RADIUS_OF_JUPITER,
-                        "RelaySatellite"), controller.getInfo("Satellite1"));
+                "RelaySatellite"), controller.getInfo("Satellite1"));
     }
 
     @Test
@@ -204,7 +229,7 @@ public class Task2ExampleTests {
         BlackoutController controller = new BlackoutController();
 
         controller.createSatellite("Satellite1", "TeleportingSatellite", 10000 + RADIUS_OF_JUPITER,
-                        Angle.fromDegrees(0));
+                Angle.fromDegrees(0));
 
         // Satellite position should increase if going clockwise (except from 360 -> 0)
         // Verify that Satellite1 is going in a clockwise direction (default)
@@ -220,5 +245,171 @@ public class Task2ExampleTests {
 
         // Verify that Satellite1 is now at theta=0
         assertTrue(controller.getInfo("Satellite1").getPosition().toDegrees() % 360 == 0);
+    }
+
+    private double getPositionDegreesWrapper(BlackoutController controller, String satId) {
+        var ans = controller.getInfo(satId).getPosition().toDegrees();
+        return round2DP(ans);
+    }
+
+    private double getPositionRadiansWrapper(BlackoutController controller, String satId) {
+        var ans = (Math.toRadians(controller.getInfo(satId).getPosition().toDegrees()));
+        if (Math.toDegrees(ans) < 0) {
+            while (Math.toDegrees(ans) < 0) {
+                ans = 2 * Math.PI + ans;
+            }
+        }
+        return ans;
+    }
+
+    private double round2DP(double num) {
+        return Math.round(num * 100.0) / 100.0;
+    }
+    private double normaliseAngle(double degrees) {
+        return Angle.normaliseAngle(Angle.fromDegrees(degrees)).toDegrees();
+    }
+
+    @Test
+    public void simpleStandardSatelliteMovement() {
+        var controller = new BlackoutController();
+        controller.createSatellite("S1", "StandardSatellite", 400 + RADIUS_OF_JUPITER, Angle.fromDegrees(358));
+        controller.createSatellite("S2", "StandardSatellite", 400 + RADIUS_OF_JUPITER, Angle.fromDegrees(182));
+        controller.createSatellite("S3", "StandardSatellite", 400 + RADIUS_OF_JUPITER, Angle.fromDegrees(247));
+        controller.createSatellite("S4", "StandardSatellite", 400 + RADIUS_OF_JUPITER, Angle.fromDegrees(67));
+        double increase = 2.0372267324132185;
+        controller.simulate(1);
+        assertEquals(round2DP(358 - increase), getPositionDegreesWrapper(controller, "S1"));
+        assertEquals(round2DP(182 - increase), getPositionDegreesWrapper(controller, "S2"));
+        assertEquals(round2DP(247 - increase), getPositionDegreesWrapper(controller, "S3"));
+        assertEquals(round2DP(67 - increase), getPositionDegreesWrapper(controller, "S4"));
+        controller.simulate(120);
+        assertEquals(round2DP(358 - increase * 121), getPositionDegreesWrapper(controller, "S1"));
+        assertEquals(round2DP(182 - increase * 121 + 360), getPositionDegreesWrapper(controller, "S2"));
+        assertEquals(round2DP(247 - increase * 121), getPositionDegreesWrapper(controller, "S3"));
+        assertEquals(round2DP(67 - increase * 121 + 360), getPositionDegreesWrapper(controller, "S4"));
+        controller.createSatellite("S5", "StandardSatellite", 150 + RADIUS_OF_JUPITER, Angle.fromRadians(0.2617993877991494));
+        controller.simulate(1);
+        assertEquals(0.22611619743646547, getPositionRadiansWrapper(controller, "S5"));
+        controller.simulate(200);
+        assertEquals(5.6558487392588805, getPositionRadiansWrapper(controller, "S5"));
+    }
+
+    @Test
+    public void simpleTeleportingSatelliteMovement() {
+        var con = new BlackoutController();
+        con.createSatellite("S0", "TeleportingSatellite", 150 + RADIUS_OF_JUPITER, Angle.fromDegrees(136));
+        con.simulate(54);
+        assertEquals(0, getPositionDegreesWrapper(con, "S0"));
+
+        //70031
+        con.createSatellite("S1", "TeleportingSatellite", 120 + RADIUS_OF_JUPITER, Angle.fromDegrees(35));
+        con.createSatellite("S2", "TeleportingSatellite", 120 + RADIUS_OF_JUPITER, Angle.fromDegrees(136));
+        con.createSatellite("S3", "TeleportingSatellite", 120 + RADIUS_OF_JUPITER, Angle.fromDegrees(222));
+        con.createSatellite("S4", "TeleportingSatellite", 120 + RADIUS_OF_JUPITER, Angle.fromDegrees(331));
+        double increase = 0.8181488128554829;
+        con.simulate(1);
+        assertEquals(round2DP(35 + increase), getPositionDegreesWrapper(con, "S1"));
+        assertEquals(round2DP(136 + increase), getPositionDegreesWrapper(con, "S2"));
+        assertEquals(round2DP(222 + increase), getPositionDegreesWrapper(con, "S3"));
+        assertEquals(round2DP(331 + increase), getPositionDegreesWrapper(con, "S4"));
+        con.simulate(25);
+        assertEquals(round2DP(35 + increase * 26), getPositionDegreesWrapper(con, "S1"));
+        assertEquals(round2DP(136 + increase * 26), getPositionDegreesWrapper(con, "S2"));
+        assertEquals(round2DP(222 + increase * 26), getPositionDegreesWrapper(con, "S3"));
+        assertEquals(round2DP(331 + increase * 26), getPositionDegreesWrapper(con, "S4"));
+        con.simulate(25);
+        assertEquals(round2DP(35 + increase * 51), getPositionDegreesWrapper(con, "S1"));
+        assertEquals(round2DP(136 + increase * 51), getPositionDegreesWrapper(con, "S2"));
+        assertEquals(round2DP(222 + increase * 51), getPositionDegreesWrapper(con, "S3"));
+        assertEquals(round2DP(normaliseAngle(331 + increase * 51)), getPositionDegreesWrapper(con, "S4"));
+        con.simulate(24);
+        assertEquals(round2DP(35 + increase * 75), getPositionDegreesWrapper(con, "S1"));
+        assertEquals(round2DP(360 - increase * 21), getPositionDegreesWrapper(con, "S2"));
+        assertEquals(round2DP(222 + increase * 75), getPositionDegreesWrapper(con, "S3"));
+        assertEquals(round2DP(normaliseAngle(331 + increase * 75)), getPositionDegreesWrapper(con, "S4"));
+        con.simulate(25);
+        assertEquals(round2DP(35 + increase * 100), getPositionDegreesWrapper(con, "S1"));
+        assertEquals(round2DP(360 - increase * 46), getPositionDegreesWrapper(con, "S2"));
+        assertEquals(round2DP(222 + increase * 100), getPositionDegreesWrapper(con, "S3"));
+        assertEquals(round2DP(normaliseAngle(331 + increase * 100)), getPositionDegreesWrapper(con, "S4"));
+        con.simulate(25);
+        assertEquals(round2DP(35 + increase * 125), getPositionDegreesWrapper(con, "S1"));
+        assertEquals(round2DP(360 - increase * 71), getPositionDegreesWrapper(con, "S2"));
+        assertEquals(round2DP(222 + increase * 125), getPositionDegreesWrapper(con, "S3"));
+        assertEquals(round2DP(normaliseAngle(331 + increase * 125)), getPositionDegreesWrapper(con, "S4"));
+        con.simulate(25);
+        assertEquals(round2DP(35 + increase * 150), getPositionDegreesWrapper(con, "S1"));
+        assertEquals(round2DP(360 - increase * 96), getPositionDegreesWrapper(con, "S2"));
+        assertEquals(round2DP(222 + increase * 150), getPositionDegreesWrapper(con, "S3"));
+        assertEquals(round2DP(normaliseAngle(331 + increase * 150)), getPositionDegreesWrapper(con, "S4"));
+        con.simulate(25);
+        assertEquals(round2DP(35 + increase * 175), getPositionDegreesWrapper(con, "S1"));
+        assertEquals(round2DP(360 - increase * 121), getPositionDegreesWrapper(con, "S2"));
+        assertEquals(round2DP(normaliseAngle(222 + increase * 175)), getPositionDegreesWrapper(con, "S3"));
+        assertEquals(round2DP(normaliseAngle(331 + increase * 175)), getPositionDegreesWrapper(con, "S4"));
+        con.simulate(3);
+        assertEquals(round2DP(0), getPositionDegreesWrapper(con, "S1"));
+        assertEquals(round2DP(360 - increase * 124), getPositionDegreesWrapper(con, "S2"));
+        assertEquals(round2DP(normaliseAngle(222 + increase * 178)), getPositionDegreesWrapper(con, "S3"));
+        assertEquals(round2DP(normaliseAngle(331 + increase * 178)), getPositionDegreesWrapper(con, "S4"));
+        con.simulate(97);
+        assertEquals(round2DP(360 - increase * 97), getPositionDegreesWrapper(con, "S1"));
+        assertEquals(round2DP(0), getPositionDegreesWrapper(con, "S2"));
+        assertEquals(round2DP(normaliseAngle(222 + increase * 275)), getPositionDegreesWrapper(con, "S3"));
+        assertEquals(round2DP(normaliseAngle(360 - increase * 19)), getPositionDegreesWrapper(con, "S4"));
+        con.simulate(1);
+        assertEquals(round2DP(360 - increase * 98), getPositionDegreesWrapper(con, "S1"));
+        assertEquals(round2DP(0 + increase), getPositionDegreesWrapper(con, "S2"));
+        assertEquals(round2DP(normaliseAngle(222 + increase * 276)), getPositionDegreesWrapper(con, "S3"));
+        assertEquals(round2DP(normaliseAngle(360 - increase * 20)), getPositionDegreesWrapper(con, "S4"));
+    }
+
+    @Test
+    public void simpleRelaySatelliteMovement() {
+        var con = new BlackoutController();
+        con.createSatellite("S1", "RelaySatellite", 150 + RADIUS_OF_JUPITER, Angle.fromDegrees(35));
+        con.createSatellite("S2", "RelaySatellite", 150 + RADIUS_OF_JUPITER, Angle.fromDegrees(136));
+        con.createSatellite("S3", "RelaySatellite", 150 + RADIUS_OF_JUPITER, Angle.fromDegrees(222));
+        con.createSatellite("S4", "RelaySatellite", 150 + RADIUS_OF_JUPITER, Angle.fromDegrees(331));
+        double increase = Angle.fromRadians(1500 / (150 + RADIUS_OF_JUPITER)).toDegrees();
+        con.simulate(1);
+        assertEquals(round2DP(35 + increase), getPositionDegreesWrapper(con, "S1"));
+        assertEquals(round2DP(136 + increase), getPositionDegreesWrapper(con, "S2"));
+        assertEquals(round2DP(222 - increase), getPositionDegreesWrapper(con, "S3"));
+        assertEquals(round2DP(331 - increase), getPositionDegreesWrapper(con, "S4"));
+        con.simulate(25);
+        assertEquals(round2DP(35 + increase * 26), getPositionDegreesWrapper(con, "S1"));
+        assertEquals(round2DP(136 + increase * 26), getPositionDegreesWrapper(con, "S2"));
+        assertEquals(round2DP(222 - increase * 26), getPositionDegreesWrapper(con, "S3"));
+        assertEquals(round2DP(331 - increase * 26), getPositionDegreesWrapper(con, "S4"));
+        con.simulate(20);
+        assertEquals(round2DP(35 + increase * 46), getPositionDegreesWrapper(con, "S1"));
+        assertEquals(round2DP(136 + increase * 46 - increase * 2), getPositionDegreesWrapper(con, "S2"));
+        assertEquals(round2DP(222 - increase * 46), getPositionDegreesWrapper(con, "S3"));
+        assertEquals(round2DP(331 - increase * 46), getPositionDegreesWrapper(con, "S4"));
+    }
+    @Test
+    public void testBordersRegionRelaySatellite() {
+        var con = new BlackoutController();
+        con.createSatellite("1", "RelaySatellite", 150 + RADIUS_OF_JUPITER, Angle.fromDegrees(139));
+        con.createSatellite("2", "RelaySatellite", 150 + RADIUS_OF_JUPITER, Angle.fromDegrees(140));
+        con.createSatellite("3", "RelaySatellite", 150 + RADIUS_OF_JUPITER, Angle.fromDegrees(191));
+        con.createSatellite("4", "RelaySatellite", 150 + RADIUS_OF_JUPITER, Angle.fromDegrees(190));
+        double increase = Angle.fromRadians(1500 / (150 + RADIUS_OF_JUPITER)).toDegrees();
+        con.simulate(1);
+        assertEquals(round2DP(139 + increase), getPositionDegreesWrapper(con, "1"));
+        assertEquals(round2DP(140 - increase), getPositionDegreesWrapper(con, "2"));
+        assertEquals(round2DP(191 - increase), getPositionDegreesWrapper(con, "3"));
+        assertEquals(round2DP(190 - increase), getPositionDegreesWrapper(con, "4"));
+        con.simulate(1);
+        assertEquals(round2DP(139 + increase * 2), getPositionDegreesWrapper(con, "1"));
+        assertEquals(round2DP(140), getPositionDegreesWrapper(con, "2"));
+        assertEquals(round2DP(191 - increase * 2), getPositionDegreesWrapper(con, "3"));
+        assertEquals(round2DP(190 - increase * 2), getPositionDegreesWrapper(con, "4"));
+        con.simulate(41);
+        assertEquals(round2DP(139 + increase * 43 - increase * 2), getPositionDegreesWrapper(con, "1"));
+        assertEquals(round2DP(140 + increase * 41), getPositionDegreesWrapper(con, "2"));
+        assertEquals(round2DP(191 - increase * 42 + 1 * increase), getPositionDegreesWrapper(con, "3"));
+        assertEquals(round2DP(190 - increase * 41 + increase * 2), getPositionDegreesWrapper(con, "4"));
     }
 }

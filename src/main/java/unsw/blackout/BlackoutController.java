@@ -16,17 +16,18 @@ import unsw.utils.MathsHelper;
 public class BlackoutController {
     // data structure to store device or satellites or both?
     DataStorageStructure dataSS = new DataStorageStructure();
+
     public void createDevice(String deviceId, String type, Angle position) {
         switch (type) {
-            case ("DesktopDevice") : {
+            case ("DesktopDevice"): {
                 dataSS.addDevice(new DesktopDevice(deviceId, position));
                 break;
             }
-            case ("LaptopDevice") : {
+            case ("LaptopDevice"): {
                 dataSS.addDevice(new LaptopDevice(deviceId, position));
                 break;
             }
-            case ("HandheldDevice") : {
+            case ("HandheldDevice"): {
                 dataSS.addDevice(new HandheldDevice(deviceId, position));
                 break;
             }
@@ -39,15 +40,15 @@ public class BlackoutController {
 
     public void createSatellite(String satelliteId, String type, double height, Angle position) {
         switch (type) {
-            case ("StandardSatellite") : {
+            case ("StandardSatellite"): {
                 dataSS.addSatellite(new StandardSatellite(satelliteId, height, position));
                 break;
             }
-            case ("TeleportingSatellite") : {
+            case ("TeleportingSatellite"): {
                 dataSS.addSatellite(new TeleportingSatellite(satelliteId, height, position));
                 break;
             }
-            case ("RelaySatellite") : {
+            case ("RelaySatellite"): {
                 dataSS.addSatellite(new RelaySatellite(satelliteId, height, position));
                 break;
             }
@@ -75,21 +76,21 @@ public class BlackoutController {
         Device dev = dataSS.getDeviceById(id);
         if (sat != null) {
             return new EntityInfoResponse(sat.getSatelliteId(),
-                                            sat.getPosition(),
-                                            sat.getHeight(),
-                                            sat.getType());
+                    sat.getPosition(),
+                    sat.getHeight(),
+                    sat.getType());
         } else {
             Map<String, FileInfoResponse> files = new HashMap<>();
             dev.getFiles().stream().forEach(file -> files.put(file.getFilename(),
-                                            new FileInfoResponse(file.getFilename(),
-                                                                    file.getContent(),
-                                                                    file.getFileSize(),
-                                                                    file.getIsTransferred())));
+                    new FileInfoResponse(file.getFilename(),
+                            file.getContent(),
+                            file.getFileSize(),
+                            file.getIsTransferred())));
             return new EntityInfoResponse(dev.getDeviceId(),
-                                            dev.getPosition(),
-                                            MathsHelper.RADIUS_OF_JUPITER,
-                                            dev.getType(),
-                                            files);
+                    dev.getPosition(),
+                    MathsHelper.RADIUS_OF_JUPITER,
+                    dev.getType(),
+                    files);
         }
     }
 

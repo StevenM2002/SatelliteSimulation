@@ -1,12 +1,10 @@
 package unsw.blackout.satellites;
 
+import unsw.blackout.Communicable;
 import unsw.blackout.devices.Device;
-import unsw.blackout.satellites.Satellite;
 import unsw.utils.Angle;
 
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.stream.Collectors;
 
 import static unsw.utils.MathsHelper.*;
 
@@ -40,6 +38,7 @@ public class RelaySatellite extends Satellite {
     private static final String TYPE = "RelaySatellite";
     private static final int VELOCITY = 1500;
     private static final int MAXRANGE = 300000;
+
     public RelaySatellite(String satelliteId, double height, Angle position) {
         super(satelliteId, TYPE, height, position, MAXRANGE, VELOCITY);
         //In the case that the satellite doesn't start in the region [140°, 190°], it should choose whatever direction gets
@@ -47,16 +46,24 @@ public class RelaySatellite extends Satellite {
         //As a hint (and to prevent you having to do maths) this 'threshold' angle is 345°; if a relay satellite starts on
         // the threshold 345° it should take the positive direction.
         if (!isInRegion(position)) {
-            setDirection(Angle.fromDegrees(345).compareTo(position) >= 0 ? POSITIVE_DIRECTION : NEGATIVE_DIRECTION);
+            if (position.compareTo(Angle.fromDegrees(140)) < 0 && position.compareTo(Angle.fromDegrees(0)) >= 0) {
+                setDirection(POSITIVE_DIRECTION);
+            } else if (position.compareTo(Angle.fromDegrees(345)) >= 0 && position.compareTo(Angle.fromDegrees(360)) < 0) {
+                setDirection(POSITIVE_DIRECTION);
+            } else {
+                setDirection(NEGATIVE_DIRECTION);
+            }
         }
     }
+
     private boolean isInRegion(Angle angle) {
         return (angle.compareTo(Angle.fromDegrees(140)) >= 0 &&
                 angle.compareTo(Angle.fromDegrees(190)) <= 0);
     }
+
     @Override
     public void move() {
-        Angle nextPosition = getNextMove(VELOCITY);
+        Angle nextPosition = getNextMove();
         // Move normally but if it extends out of region on next move then flip direction
         if (isInRegion(getPosition()) && !isInRegion(nextPosition)) {
             setPosition(nextPosition);

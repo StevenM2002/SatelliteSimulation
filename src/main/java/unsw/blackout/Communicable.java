@@ -1,7 +1,8 @@
-package unsw.blackout.satellites;
+package unsw.blackout;
 
 import unsw.blackout.devices.Device;
-import unsw.utils.MathsHelper;
+import unsw.blackout.satellites.Satellite;
+import unsw.blackout.satellites.SatellitesAndDevices;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -10,20 +11,15 @@ import java.util.stream.Collectors;
 import static unsw.utils.MathsHelper.getDistance;
 import static unsw.utils.MathsHelper.isVisible;
 
-
-// Ok so, map out where all the communicable satellites are, then map out all the devices which are communicable to
-// the relays.
-
-// If the source is a device, then after finding out all communicables, filter out communicable devices and unsupported
-// devices as a device cannot transfer to a device
 public class Communicable {
-    private static SatellitesAndDevices getSet(SatellitesAndDevices toSet) {
-        HashSet<Satellite> satellites = new HashSet<>();
-        HashSet<Device> devices = new HashSet<>();
-        satellites.addAll(toSet.satellites);
-        devices.addAll(toSet.devices);
-        return new SatellitesAndDevices(new ArrayList<>(satellites), new ArrayList<>(devices));
-    }
+    /**
+     * Gets all communicable entities ignoring any compatability issues and removing source entity from returned value
+     *
+     * @param source
+     * @param allEntities
+     * @param <T>         Either Device or Satellite
+     * @return An object containing all communicable entities to source
+     */
     public static <T> SatellitesAndDevices getAllCommunicableEntities(T source, SatellitesAndDevices allEntities) {
 
         SatellitesAndDevices primaryCommunicable = getAllPrimaryCommunicableEntities(source, allEntities);
@@ -46,36 +42,28 @@ public class Communicable {
         allCommunicable.satellites.remove(source);
         return allCommunicable;
     }
-//    /**
-//     * Gets all the communicable satellites from device regardless of compatability
-//     * @param device
-//     * @param allEntities
-//     * @return All communicable entities
-//     */
-//    public static ArrayList<Satellite> getAllCommunicableEntities(Device source, SatellitesAndDevices allEntities) {
-//        HashSet<Satellite> allCommunicableSatellites = new HashSet<>();
-//        SatellitesAndDevices primaryCommunicable = getAllPrimaryCommunicableEntities(source, allEntities);
-//        ArrayList<Satellite> allRelays = primaryCommunicable.satellites
-//                .stream()
-//                .filter(satellite -> satellite.getType().equals("RelaySatellite"))
-//                .collect(Collectors.toCollection(ArrayList::new));
-//        if (!allRelays.isEmpty()) {
-//            HashSet<Satellite> setOfAllRelays = new HashSet<>();
-//            for (var relay : allRelays) {
-//                setOfAllRelays.addAll(getAllCommunicableRelays(relay, allEntities.satellites));
-//            }
-//            ArrayList<Satellite> chainOfAllRelays = new ArrayList<>(setOfAllRelays);
-//            return getAllCommunicableFromRelays(chainOfAllRelays, allEntities).satellites;
-//        }
-//        // If no relays
-//        return new ArrayList<>(primaryCommunicable.satellites);
-//    }
+
+    /**
+     * Removes any duplicates
+     *
+     * @param toSet
+     * @return set with no duplicates
+     */
+    private static SatellitesAndDevices getSet(SatellitesAndDevices toSet) {
+        HashSet<Satellite> satellites = new HashSet<>();
+        HashSet<Device> devices = new HashSet<>();
+        satellites.addAll(toSet.satellites);
+        devices.addAll(toSet.devices);
+        return new SatellitesAndDevices(new ArrayList<>(satellites), new ArrayList<>(devices));
+    }
+
     /**
      * Gets all the primary communicable entities i.e. not through relays
+     *
      * @param source
      * @param allEntities
+     * @param <T>         can either be Device or Satellite
      * @return Communicable satellites and devices if source is Satellite, if source is Device, only communicable satellites
-     * @param <T> can either be Device or Satellite
      */
     private static <T> SatellitesAndDevices getAllPrimaryCommunicableEntities(T source, SatellitesAndDevices allEntities) {
         // Satellite to satellite
@@ -103,13 +91,15 @@ public class Communicable {
         }
         return null;
     }
+
     /**
      * Gets all communicable devices and satellites from a chain of relays
-     * @param relays chain of relays which can all communicate with each other
+     *
+     * @param relays      chain of relays which can all communicate with each other
      * @param allEntities
      * @return All communicable devices and satellites from the chain of relays including the relays themselves
      */
-    public static SatellitesAndDevices getAllCommunicableFromRelays(ArrayList<Satellite> relays, SatellitesAndDevices allEntities) {
+    private static SatellitesAndDevices getAllCommunicableFromRelays(ArrayList<Satellite> relays, SatellitesAndDevices allEntities) {
         SatellitesAndDevices communicableEntities = new SatellitesAndDevices();
         HashSet<Satellite> uniqueSatellites = new HashSet<>();
         HashSet<Device> uniqueDevices = new HashSet<>();
@@ -127,6 +117,7 @@ public class Communicable {
 
     /**
      * Gets all satellites that the source satellite can communicate with regardless of compatability
+     *
      * @param source
      * @param allSatellites
      * @return satellites that are communicable from source
@@ -140,6 +131,7 @@ public class Communicable {
 
     /**
      * Gets all devices that the source satellite can communicate to regardless of compatability
+     *
      * @param source
      * @param allDevices
      * @return Devices that are communicable from source
@@ -150,13 +142,15 @@ public class Communicable {
                 .filter(device -> isCommunicable(source, device))
                 .collect(Collectors.toCollection(ArrayList::new));
     }
+
     /**
      * Gets all the relays that are communicable to the source
-     * @param source relay
+     *
+     * @param source        relay
      * @param allSatellites
      * @return all relays that are communicable with the source relay
      */
-    public static HashSet<Satellite> getAllCommunicableRelays(Satellite source, ArrayList<Satellite> allSatellites) {
+    private static HashSet<Satellite> getAllCommunicableRelays(Satellite source, ArrayList<Satellite> allSatellites) {
         HashSet<Satellite> visitedRelays = new HashSet<>();
         var allRelays = allSatellites
                 .stream()
@@ -165,8 +159,9 @@ public class Communicable {
         doRelayDfs(source, allRelays, visitedRelays);
         return visitedRelays;
     }
+
     private static void doRelayDfs(Satellite sourceRelay, ArrayList<Satellite> allRelays,
-                              HashSet<Satellite> visitedRelays) {
+                                   HashSet<Satellite> visitedRelays) {
         if (sourceRelay == null) return;
         visitedRelays.add(sourceRelay);
         var nextRelay = getNextRelay(sourceRelay, allRelays, visitedRelays);
@@ -175,6 +170,7 @@ public class Communicable {
 
     /**
      * Gets the next relay for dfs
+     *
      * @param source
      * @param allRelays
      * @param visitedRelays
@@ -191,6 +187,7 @@ public class Communicable {
 
     /**
      * Is communicable from satellite to satellite
+     *
      * @param source
      * @param dest
      * @return if it is communicable
@@ -202,6 +199,7 @@ public class Communicable {
 
     /**
      * Is communicable from satellite to device
+     *
      * @param source
      * @param dest
      * @return if it is communicable
@@ -213,6 +211,7 @@ public class Communicable {
 
     /**
      * Is communicable from device to satellite
+     *
      * @param source
      * @param dest
      * @return if it is communicable

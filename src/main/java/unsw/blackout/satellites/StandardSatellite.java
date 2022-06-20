@@ -1,9 +1,8 @@
 package unsw.blackout.satellites;
 
+import unsw.blackout.Communicable;
 import unsw.blackout.devices.Device;
-import unsw.blackout.satellites.Satellite;
 import unsw.utils.Angle;
-import unsw.utils.MathsHelper;
 
 import java.util.ArrayList;
 import java.util.stream.Collectors;
@@ -18,6 +17,7 @@ public class StandardSatellite extends Satellite {
     private static final String TYPE = "StandardSatellite";
     private static final int VELOCITY = 2500;
     private static final int MAXRANGE = 150000;
+
     public StandardSatellite(String satelliteId, double height, Angle position) {
         super(satelliteId, TYPE, height, position, MAXRANGE, VELOCITY);
     }
@@ -27,7 +27,7 @@ public class StandardSatellite extends Satellite {
      */
     @Override
     public void move() {
-        setPosition(getNextMove(VELOCITY));
+        setPosition(getNextMove());
     }
 
     @Override
@@ -35,9 +35,9 @@ public class StandardSatellite extends Satellite {
         SatellitesAndDevices communicable = Communicable.getAllCommunicableEntities(this, new SatellitesAndDevices(satellites, devices));
         communicable.devices =
                 communicable.devices
-                    .stream()
-                    .filter(device -> !device.getType().equals("DesktopDevice"))
-                    .collect(Collectors.toCollection(ArrayList::new));
+                        .stream()
+                        .filter(device -> !device.getType().equals("DesktopDevice"))
+                        .collect(Collectors.toCollection(ArrayList::new));
         return communicable;
     }
 

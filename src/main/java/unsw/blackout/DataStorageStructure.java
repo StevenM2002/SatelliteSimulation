@@ -14,19 +14,22 @@ public class DataStorageStructure {
 
     /**
      * Gets a satellite by its satelliteId
+     *
      * @param satelliteId
      * @return Satellite if found else null
      */
     public Satellite getSatelliteById(String satelliteId) {
-        for(var satellite : satellites) {
+        for (var satellite : satellites) {
             if (satellite.getSatelliteId().equals(satelliteId)) {
                 return satellite;
             }
         }
         return null;
     }
+
     /**
      * Removes the first satellite found by satelliteId
+     *
      * @param satelliteId
      */
     public void removeSatelliteById(String satelliteId) {
@@ -38,8 +41,10 @@ public class DataStorageStructure {
             }
         }
     }
+
     /**
      * Removes the first device found by deviceId
+     *
      * @param deviceId
      */
     public void removeDeviceById(String deviceId) {
@@ -51,8 +56,10 @@ public class DataStorageStructure {
             }
         }
     }
+
     /**
      * Adds a file to device
+     *
      * @param deviceId
      * @param filename
      * @param content
@@ -65,19 +72,22 @@ public class DataStorageStructure {
 
     /**
      * Gets a device by its deviceId
+     *
      * @param deviceId
      * @return Device if found else null
      */
     public Device getDeviceById(String deviceId) {
-        for(var device : devices) {
+        for (var device : devices) {
             if (device.getDeviceId().equals(deviceId)) {
                 return device;
             }
         }
         return null;
     }
+
     /**
      * Adds a device to storage
+     *
      * @param device
      */
     public void addDevice(Device device) {
@@ -86,6 +96,7 @@ public class DataStorageStructure {
 
     /**
      * Adds a satellite to storage
+     *
      * @param satellite
      */
     public void addSatellite(Satellite satellite) {

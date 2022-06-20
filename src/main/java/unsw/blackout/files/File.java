@@ -13,6 +13,16 @@ public class File {
         this.isTransferred = isTransferred;
     }
 
+    /**
+     * Constructor for empty file that is not finished transferring
+     * @param filename
+     */
+    public File(String filename) {
+        this.filename = filename;
+        this.content = "";
+        this.isTransferred = false;
+    }
+
     public String getFilename() {
         return filename;
     }
@@ -27,6 +37,10 @@ public class File {
 
     public boolean getIsTransferred() {
         return isTransferred;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
     }
 
     public void setIsTransferred(boolean transferred) {

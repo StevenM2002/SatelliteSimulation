@@ -110,6 +110,7 @@ public class Task1ExampleTests {
         assertListAreEqualIgnoringOrder(controller.listSatelliteIds(), Arrays.asList("Satellite1"));
         assertListAreEqualIgnoringOrder(controller.listDeviceIds(), Arrays.asList());
     }
+
     @Test
     public void testEntityInfoResponseAndCreateFile() {
         BlackoutController controller = new BlackoutController();

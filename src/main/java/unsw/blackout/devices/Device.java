@@ -1,6 +1,7 @@
 package unsw.blackout.devices;
 
 import unsw.blackout.files.File;
+import unsw.blackout.files.Transferring;
 import unsw.blackout.satellites.Satellite;
 import unsw.blackout.satellites.SatellitesAndDevices;
 import unsw.utils.Angle;
@@ -23,6 +24,7 @@ public abstract class Device {
         this.position = position;
         this.maxRange = maxRange;
     }
+
     public String getDeviceId() {
         return deviceId;
     }
@@ -42,9 +44,12 @@ public abstract class Device {
     public int getMaxRange() {
         return maxRange;
     }
+
     public abstract SatellitesAndDevices getAllCommunicableEntities(ArrayList<Satellite> satellites, ArrayList<Device> devices);
+
     /**
      * Adds a file to the storage
+     *
      * @param file
      */
     public void addFile(File file) {

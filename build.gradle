@@ -28,18 +28,18 @@ apply plugin: 'eclipse'
 
 sourceSets {
     main {
-       java {
+        java {
             srcDir 'src/main/java'
-       }
-       resources {
-           srcDir 'src/main/resources'
-       }
-   }
-   test {
-       java {
-           srcDir 'src/test'
-       }
-   }
+        }
+        resources {
+            srcDir 'src/main/resources'
+        }
+    }
+    test {
+        java {
+            srcDir 'src/test'
+        }
+    }
 }
 
 mainClassName = 'unsw.App'
@@ -49,9 +49,9 @@ test {
 }
 
 allprojects {
-  apply plugin: 'java'
+    apply plugin: 'java'
 
-  tasks.withType(Copy).all {
-    duplicatesStrategy 'exclude'
-  }
+    tasks.withType(Copy).all {
+        duplicatesStrategy 'exclude'
+    }
 }
