@@ -11,7 +11,5 @@ public class FileManagement {
     private ArrayList<FilesTransferring> transferringFiles = new ArrayList<>();
 
     public void transferFile(Device source, Satellite destination, String fileName) {
-        for (var each : source.getFiles())
-        var newTransfer = new FilesTransferring();
     }
 }
