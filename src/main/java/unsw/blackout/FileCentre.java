@@ -40,6 +40,7 @@ public class FileCentre {
     // We can know that there will never be an overlap in files because we will check that
     // i.e. {Satellite1 : [File1], Satellite 2 : [File1]} will never exist
     private HashMap<Entity, HashMap<Entity, ArrayList<File>>> allFiles = new HashMap<>();
+
     private int getTotalBytesOfFiles(Entity entity) {
         int totalBytes = 0;
         var entityFiles = allFiles.get(entity).values();
@@ -50,6 +51,7 @@ public class FileCentre {
         }
         return totalBytes;
     }
+
     private int getTotalNumFiles(Entity entity) {
         int totalFiles = 0;
         var entityFiles = allFiles.get(entity).values();
@@ -61,6 +63,7 @@ public class FileCentre {
 
     /**
      * Gets the file regardless if it is fully transferred on entity
+     *
      * @param entity
      * @param fileName
      * @return null if it doesn't exist else file
@@ -159,32 +162,21 @@ public class FileCentre {
         File file = getFileFromEntity(from, fileName);
         allFiles.get(to).get(from).add(new File(file));
     }
+
     public void updateTransfer(ArrayList<Entity> allEntities) {
         // Sat1 : Dev1 : File1, Dev2 : File2
         // Remove all that cannot be transferred
-        System.out.println(allFiles);
         allFiles
                 .entrySet()
                 .forEach(toEntityEntry ->
-                        toEntityEntry
-                            .getValue()
-                            .entrySet()
-                            .forEach(fromEntityEntry -> {
-                                        System.out.println(fromEntityEntry.getKey());
-                                        System.out.println(toEntityEntry.getKey());
-//                                        System.out.println(!communicableEntities(fromEntityEntry.getKey(), allEntities).contains(toEntityEntry.getKey()));
-                                        fromEntityEntry
-                                                .getValue()
-                                                .removeIf(file -> {
-                                                    System.out.println(file);
-                                                    System.out.println(!file.isTransferred() &&
-                                                            !communicableEntities(fromEntityEntry.getKey(), allEntities).contains(toEntityEntry.getKey()));
-                                                    return !file.isTransferred() &&
-                                                        !communicableEntities(fromEntityEntry.getKey(), allEntities).contains(toEntityEntry.getKey());
-                                                });
-                                    }
-//                                !communicableEntities(fromEntityEntry.getKey(), allEntities).contains(toEntityEntry.getKey())
-                            )
+                                toEntityEntry
+                                    .getValue()
+                                    .entrySet()
+                                    .forEach(fromEntityEntry -> {
+                                                fromEntityEntry.getValue().removeIf(file -> !file.isTransferred()
+                                                        && !communicableEntities(fromEntityEntry.getKey(), allEntities).contains(toEntityEntry.getKey()));
+                                            }
+                                    )
                 );
         // To calculate the bandwidth, I need floor(max bandwidth / files being sent)
         // First retrieve the owner of the files, and the previous owner of the files.
@@ -193,26 +185,28 @@ public class FileCentre {
                 .entrySet()
                 .forEach(toEntityEntry ->
                         toEntityEntry
-                            .getValue()
-                            .entrySet()
-                            .forEach(fromEntityEntry -> {
-                                Entity toEntity = toEntityEntry.getKey();
-                                Entity fromEntity = fromEntityEntry.getKey();
-                                int outgoingFiles = getNumberFilesBeingTransferredOutwards(fromEntity);
-                                int incomingFiles = getNumberFilesBeingTransferredInwards(toEntity);
-                                // Get the smallest of each
-                                int outBandwidth = outgoingFiles != 0 ? fromEntity.getMaxOutgoing() / outgoingFiles : 0;
-                                int inBandwidth = incomingFiles != 0 ? toEntity.getMaxIncoming() / incomingFiles : 0;
-                                int bytesToSend = Math.min(inBandwidth, outBandwidth);
-                                fromEntityEntry.getValue().forEach(file -> file.makeNextBytesAvailable(bytesToSend));
-                            })
+                                .getValue()
+                                .entrySet()
+                                .forEach(fromEntityEntry -> {
+                                    Entity toEntity = toEntityEntry.getKey();
+                                    Entity fromEntity = fromEntityEntry.getKey();
+                                    int outgoingFiles = getNumberFilesBeingTransferredOutwards(fromEntity);
+                                    int incomingFiles = getNumberFilesBeingTransferredInwards(toEntity);
+                                    // Get the smallest of each
+                                    int outBandwidth = outgoingFiles != 0 ? fromEntity.getMaxOutgoing() / outgoingFiles : 0;
+                                    int inBandwidth = incomingFiles != 0 ? toEntity.getMaxIncoming() / incomingFiles : 0;
+                                    int bytesToSend = Math.min(inBandwidth, outBandwidth);
+                                    fromEntityEntry.getValue().forEach(file -> file.makeNextBytesAvailable(bytesToSend));
+                                })
                 );
     }
+
     private ArrayList<Entity> communicableEntities(Entity source, ArrayList<Entity> allEntities) {
         var ret = source.getAllCommunicableEntities(allEntities);
         ret.removeIf(entity -> entity.getType().equals("RelaySatellite"));
         return ret;
     }
+
     public void addFileInstantly(Entity to, File file) {
 
 
@@ -225,6 +219,7 @@ public class FileCentre {
         }
         allFiles.get(to).get(to).add(file);
     }
+
     public ArrayList<File> getFiles(Entity entity) {
         if (allFiles.get(entity) == null) return new ArrayList<>();
         return allFiles

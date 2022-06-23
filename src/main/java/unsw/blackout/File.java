@@ -9,6 +9,7 @@ public class File {
     /**
      * Construct a file that isn't transferred, and no contents are readable.
      * Creates a deep copy of given File object.
+     *
      * @param file
      */
     public File(File file) {
@@ -19,6 +20,7 @@ public class File {
 
     /**
      * Construct a file that is transferred, and all contents are readable
+     *
      * @param fileName
      * @param content
      */
@@ -35,6 +37,7 @@ public class File {
 
     /**
      * Get the content currently available
+     *
      * @return
      */
     public String getContent() {
@@ -52,6 +55,7 @@ public class File {
 
     /**
      * Get the size of the content after finishing transferring
+     *
      * @return
      */
     public int getSize() {
@@ -60,12 +64,6 @@ public class File {
 
     public boolean isTransferred() {
         return isTransferred;
-    }
-
-    public void removeTBytes() {
-        this.content.replaceAll("t", "");
-        this.accessibleBytes = this.content.length();
-        this.isTransferred = true;
     }
 
     @Override

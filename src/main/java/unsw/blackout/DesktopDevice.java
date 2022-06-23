@@ -3,7 +3,6 @@ package unsw.blackout;
 import unsw.utils.Angle;
 
 import java.util.ArrayList;
-import java.util.stream.Collectors;
 
 public class DesktopDevice extends Device {
     private static final String TYPE = "DesktopDevice";

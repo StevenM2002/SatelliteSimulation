@@ -19,6 +19,7 @@ public final class CommunicationHelpers {
         doRelayDfs(source, allRelays, visitedRelays, visitedEntities, allEntities);
         return new ArrayList<>(visitedEntities);
     }
+
     public static ArrayList<Entity> getAllPrimaryCommunicableEntities(Entity source, ArrayList<Entity> allEntities) {
         HashSet<Entity> entitySet = allEntities.stream()
                 .filter(entity -> {
@@ -27,6 +28,7 @@ public final class CommunicationHelpers {
                 .collect(Collectors.toCollection(HashSet::new));
         return new ArrayList<>(entitySet);
     }
+
     private static void doRelayDfs(RelaySatellite sourceRelay, ArrayList<RelaySatellite> allRelays,
                                    HashSet<RelaySatellite> visitedRelays, HashSet<Entity> visitedEntities, ArrayList<Entity> allEntities) {
         if (sourceRelay == null) return;
@@ -35,14 +37,17 @@ public final class CommunicationHelpers {
         var nextRelay = getNextRelay(sourceRelay, allRelays, visitedRelays);
         doRelayDfs(nextRelay, allRelays, visitedRelays, visitedEntities, allEntities);
     }
+
     private static RelaySatellite getNextRelay(RelaySatellite source, ArrayList<RelaySatellite> allRelays, HashSet<RelaySatellite> visitedRelays) {
         return allRelays.stream()
                 .filter(satellite -> isCommunicable(source, satellite) && !visitedRelays.contains(satellite))
                 .findFirst()
                 .orElse(null);
     }
+
     /**
      * Is communicable from Entity to Entity
+     *
      * @param source
      * @param dest
      * @return if it is communicable

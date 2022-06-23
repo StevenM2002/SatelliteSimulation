@@ -78,6 +78,7 @@ public abstract class Entity {
 
     /**
      * Gets all communicable entities from source regardless of compatability
+     *
      * @param allEntities
      * @return all communicable entities
      */

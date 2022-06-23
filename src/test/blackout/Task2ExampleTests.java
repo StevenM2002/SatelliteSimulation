@@ -100,9 +100,7 @@ public class Task2ExampleTests {
         controller.createSatellite("Satellite3", "StandardSatellite", 2000 + RADIUS_OF_JUPITER, Angle.fromDegrees(175));
         assertListAreEqualIgnoringOrder(Arrays.asList("DeviceB", "DeviceC", "Satellite2"), controller.communicableEntitiesInRange("Satellite1"));
         assertListAreEqualIgnoringOrder(Arrays.asList("DeviceB", "DeviceC", "Satellite1"), controller.communicableEntitiesInRange("Satellite2"));
-        System.out.println(controller.communicableEntitiesInRange("DeviceB"));
         assertListAreEqualIgnoringOrder(Arrays.asList("Satellite2", "Satellite1"), controller.communicableEntitiesInRange("DeviceB"));
-
         assertListAreEqualIgnoringOrder(Arrays.asList("DeviceD"), controller.communicableEntitiesInRange("Satellite3"));
     }
 
@@ -457,18 +455,5 @@ public class Task2ExampleTests {
         assertEquals(round2DP(140 + increase * 41), getPositionDegreesWrapper(con, "2"));
         assertEquals(round2DP(191 - increase * 42 + 1 * increase), getPositionDegreesWrapper(con, "3"));
         assertEquals(round2DP(190 - increase * 41 + increase * 2), getPositionDegreesWrapper(con, "4"));
-    }
-    @Test
-    public void testa() {
-        HashMap<Double, HashMap<String, Integer>> x = new HashMap<>();
-        x.put(1.1, new HashMap<>());
-        x.get(1.1).put("One", 1);
-        x.put(2.2, new HashMap<>());
-        x.get(2.2).put("Two", 2);
-        x.put(3.3, new HashMap<>());
-        x.get(3.3).put("Three", 3);
-        x.entrySet().forEach(doubleHashMapEntry -> doubleHashMapEntry.getValue().entrySet().removeIf(stringIntegerEntry -> stringIntegerEntry.getValue() == 3 && doubleHashMapEntry.getKey() == 3.3));
-//        x.values().forEach(y -> y.entrySet().removeIf(stringIntegerEntry -> stringIntegerEntry.getValue() == 3));
-        System.out.println(x);
     }
 }

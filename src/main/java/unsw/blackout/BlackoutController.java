@@ -13,6 +13,7 @@ public class BlackoutController {
 //    DataStorageStructure dataSS = new DataStorageStructure();
     private ArrayList<Entity> allEntities = new ArrayList<>();
     private FileCentre fileCentre = new FileCentre();
+
     public void createDevice(String deviceId, String type, Angle position) {
         switch (type) {
             case ("DesktopDevice"): {
@@ -74,7 +75,8 @@ public class BlackoutController {
             if (entity.getId().equals(deviceId)) {
                 fileCentre.addFileInstantly(entity, new File(filename, content));
             }
-        };
+        }
+        ;
     }
 
     public EntityInfoResponse getInfo(String id) {
@@ -85,7 +87,7 @@ public class BlackoutController {
         Map<String, FileInfoResponse> files = new HashMap<>();
         for (File file : fileCentre.getFiles(entity)) {
             files.put(file.getFileName(),
-            new FileInfoResponse(file.getFileName(), file.getContent(), file.getSize(), file.isTransferred()));
+                    new FileInfoResponse(file.getFileName(), file.getContent(), file.getSize(), file.isTransferred()));
         }
         return new EntityInfoResponse(entity.getId(), entity.getPosition(), entity.getHeight(), entity.getType(), files);
     }
