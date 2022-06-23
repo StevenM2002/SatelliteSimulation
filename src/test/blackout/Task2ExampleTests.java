@@ -6,8 +6,7 @@ import org.junit.jupiter.api.TestInstance.Lifecycle;
 
 import unsw.blackout.BlackoutController;
 import unsw.blackout.FileTransferException;
-import unsw.blackout.satellites.StandardSatellite;
-import unsw.blackout.satellites.TeleportingSatellite;
+import unsw.blackout.MyAngleHelper;
 import unsw.response.models.FileInfoResponse;
 import unsw.response.models.EntityInfoResponse;
 import unsw.utils.Angle;
@@ -16,11 +15,11 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static unsw.utils.MathsHelper.NEGATIVE_DIRECTION;
 import static unsw.utils.MathsHelper.RADIUS_OF_JUPITER;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 
 import static blackout.TestHelpers.assertListAreEqualIgnoringOrder;
 
@@ -99,9 +98,9 @@ public class Task2ExampleTests {
         controller.createDevice("DeviceC", "HandheldDevice", Angle.fromDegrees(320));
         controller.createDevice("DeviceD", "HandheldDevice", Angle.fromDegrees(180));
         controller.createSatellite("Satellite3", "StandardSatellite", 2000 + RADIUS_OF_JUPITER, Angle.fromDegrees(175));
-
         assertListAreEqualIgnoringOrder(Arrays.asList("DeviceB", "DeviceC", "Satellite2"), controller.communicableEntitiesInRange("Satellite1"));
         assertListAreEqualIgnoringOrder(Arrays.asList("DeviceB", "DeviceC", "Satellite1"), controller.communicableEntitiesInRange("Satellite2"));
+        System.out.println(controller.communicableEntitiesInRange("DeviceB"));
         assertListAreEqualIgnoringOrder(Arrays.asList("Satellite2", "Satellite1"), controller.communicableEntitiesInRange("DeviceB"));
 
         assertListAreEqualIgnoringOrder(Arrays.asList("DeviceD"), controller.communicableEntitiesInRange("Satellite3"));
@@ -127,6 +126,53 @@ public class Task2ExampleTests {
         assertEquals(new FileInfoResponse("FileAlpha", "", msg.length(), false), controller.getInfo("Satellite1").getFiles().get("FileAlpha"));
         controller.simulate(msg.length() * 2);
         assertThrows(FileTransferException.VirtualFileAlreadyExistsException.class, () -> controller.sendFile("FileAlpha", "DeviceC", "Satellite1"));
+    }
+
+    @Test
+    public void testExceptions() {
+        var con = new BlackoutController();
+        con.createDevice("D1", "HandheldDevice", Angle.fromDegrees(130));
+        con.createDevice("D2", "DesktopDevice", Angle.fromDegrees(230));
+        con.createSatellite("S1", "StandardSatellite", 5000 + RADIUS_OF_JUPITER, Angle.fromDegrees(130));
+        con.createSatellite("S2", "TeleportingSatellite", 5000 + RADIUS_OF_JUPITER, Angle.fromDegrees(230));
+        assertThrows(FileTransferException.VirtualFileNotFoundException.class, () -> con.sendFile("NoFile", "D1", "S1"));
+        con.addFileToDevice("D1", "F1", "C");
+        assertDoesNotThrow(() -> con.sendFile("F1", "D1", "S1"));
+        assertThrows(FileTransferException.VirtualFileAlreadyExistsException.class, () -> con.sendFile("F1", "D1", "S1"));
+        assertEquals(new FileInfoResponse("F1", "", 1, false), con.getInfo("S1").getFiles().get("F1"));
+        con.simulate(1);
+        assertThrows(FileTransferException.VirtualFileAlreadyExistsException.class, () -> con.sendFile("F1", "D1", "S1"));
+        assertEquals(new FileInfoResponse("F1", "C", 1, true), con.getInfo("S1").getFiles().get("F1"));
+        con.addFileToDevice("D2", "F2", "a".repeat(100));
+        con.addFileToDevice("D2", "F3", "b".repeat(101));
+        assertDoesNotThrow(() -> con.sendFile("F2", "D2", "S2"));
+        assertThrows(FileTransferException.VirtualFileNoStorageSpaceException.class, () -> con.sendFile("F3", "D2", "S2"));
+        con.addFileToDevice("D1", "F4", "C");
+        assertDoesNotThrow(() -> con.sendFile("F4", "D1", "S1"));
+        con.addFileToDevice("D1", "F5", "C");
+        // Receiving bandwidth throws
+        assertThrows(FileTransferException.VirtualFileNoBandwidthException.class, () -> con.sendFile("F5", "D1", "S1"));
+        con.simulate(1);
+        assertDoesNotThrow(() -> con.sendFile("F5", "D1", "S1"));
+        con.simulate(1);
+        con.addFileToDevice("D1", "F6", "C");
+        con.simulate(1);
+        assertThrows(FileTransferException.VirtualFileNoStorageSpaceException.class, () -> con.sendFile("F6", "D1", "S1"));
+        con.createDevice("D3", "LaptopDevice", Angle.fromDegrees(130));
+        // Sending bandwidth throws
+        con.createSatellite("S3", "StandardSatellite", 5000 + RADIUS_OF_JUPITER, Angle.fromDegrees(130));
+        con.addFileToDevice("D3", "F7", "A");
+        con.addFileToDevice("D3", "F8", "AA");
+        assertDoesNotThrow(() -> con.sendFile("F7", "D3", "S3"));
+        con.simulate(1);
+        assertDoesNotThrow(() -> con.sendFile("F8", "D3", "S3"));
+        con.simulate(2);
+        con.createSatellite("S4", "TeleportingSatellite", 5000 + RADIUS_OF_JUPITER, Angle.fromDegrees(130));
+        assertDoesNotThrow(() -> con.sendFile("F7", "S3", "S4"));
+        assertThrows(FileTransferException.VirtualFileAlreadyExistsException.class, () -> con.sendFile("F7", "S3", "S4"));
+        assertThrows(FileTransferException.VirtualFileNoBandwidthException.class, () -> con.sendFile("F8", "S3", "S4"));
+        con.simulate(1);
+        assertDoesNotThrow(() -> con.sendFile("F8", "S3", "S4"));
     }
 
     @Test
@@ -266,7 +312,7 @@ public class Task2ExampleTests {
         return Math.round(num * 100.0) / 100.0;
     }
     private double normaliseAngle(double degrees) {
-        return Angle.normaliseAngle(Angle.fromDegrees(degrees)).toDegrees();
+        return MyAngleHelper.normaliseAngle(Angle.fromDegrees(degrees)).toDegrees();
     }
 
     @Test
@@ -411,5 +457,18 @@ public class Task2ExampleTests {
         assertEquals(round2DP(140 + increase * 41), getPositionDegreesWrapper(con, "2"));
         assertEquals(round2DP(191 - increase * 42 + 1 * increase), getPositionDegreesWrapper(con, "3"));
         assertEquals(round2DP(190 - increase * 41 + increase * 2), getPositionDegreesWrapper(con, "4"));
+    }
+    @Test
+    public void testa() {
+        HashMap<Double, HashMap<String, Integer>> x = new HashMap<>();
+        x.put(1.1, new HashMap<>());
+        x.get(1.1).put("One", 1);
+        x.put(2.2, new HashMap<>());
+        x.get(2.2).put("Two", 2);
+        x.put(3.3, new HashMap<>());
+        x.get(3.3).put("Three", 3);
+        x.entrySet().forEach(doubleHashMapEntry -> doubleHashMapEntry.getValue().entrySet().removeIf(stringIntegerEntry -> stringIntegerEntry.getValue() == 3 && doubleHashMapEntry.getKey() == 3.3));
+//        x.values().forEach(y -> y.entrySet().removeIf(stringIntegerEntry -> stringIntegerEntry.getValue() == 3));
+        System.out.println(x);
     }
 }

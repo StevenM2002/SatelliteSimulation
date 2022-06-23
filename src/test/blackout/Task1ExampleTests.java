@@ -75,7 +75,7 @@ public class Task1ExampleTests {
         controller.createDevice("DeviceC", "DesktopDevice", Angle.fromDegrees(330));
         assertListAreEqualIgnoringOrder(Arrays.asList("DeviceC"), controller.listDeviceIds());
         assertEquals(new EntityInfoResponse("DeviceC", Angle.fromDegrees(330), RADIUS_OF_JUPITER, "DesktopDevice"), controller.getInfo("DeviceC"));
-
+        assertEquals(new EntityInfoResponse("DeviceC", Angle.fromDegrees(330), RADIUS_OF_JUPITER, "DesktopDevice", new HashMap<String, FileInfoResponse>()), controller.getInfo("DeviceC"));
         controller.addFileToDevice("DeviceC", "Hello World", "My first file!");
         Map<String, FileInfoResponse> expected = new HashMap<>();
         expected.put("Hello World", new FileInfoResponse("Hello World", "My first file!", "My first file!".length(), true));

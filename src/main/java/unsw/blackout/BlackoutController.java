@@ -3,11 +3,6 @@ package unsw.blackout;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import unsw.blackout.devices.DesktopDevice;
-import unsw.blackout.devices.Device;
-import unsw.blackout.devices.HandheldDevice;
-import unsw.blackout.devices.LaptopDevice;
-import unsw.blackout.satellites.*;
 import unsw.response.models.EntityInfoResponse;
 import unsw.response.models.FileInfoResponse;
 import unsw.utils.Angle;
@@ -15,90 +10,90 @@ import unsw.utils.MathsHelper;
 
 public class BlackoutController {
     // data structure to store device or satellites or both?
-    DataStorageStructure dataSS = new DataStorageStructure();
-
+//    DataStorageStructure dataSS = new DataStorageStructure();
+    private ArrayList<Entity> allEntities = new ArrayList<>();
+    private FileCentre fileCentre = new FileCentre();
     public void createDevice(String deviceId, String type, Angle position) {
         switch (type) {
             case ("DesktopDevice"): {
-                dataSS.addDevice(new DesktopDevice(deviceId, position));
+                allEntities.add(new DesktopDevice(deviceId, position));
                 break;
             }
             case ("LaptopDevice"): {
-                dataSS.addDevice(new LaptopDevice(deviceId, position));
+                allEntities.add(new LaptopDevice(deviceId, position));
                 break;
             }
             case ("HandheldDevice"): {
-                dataSS.addDevice(new HandheldDevice(deviceId, position));
+                allEntities.add(new HandheldDevice(deviceId, position));
                 break;
             }
         }
     }
 
     public void removeDevice(String deviceId) {
-        dataSS.removeDeviceById(deviceId);
+        allEntities.removeIf(entity -> entity.getId().equals(deviceId));
     }
 
     public void createSatellite(String satelliteId, String type, double height, Angle position) {
         switch (type) {
             case ("StandardSatellite"): {
-                dataSS.addSatellite(new StandardSatellite(satelliteId, height, position));
+                allEntities.add(new StandardSatellite(satelliteId, position, height));
                 break;
             }
             case ("TeleportingSatellite"): {
-                dataSS.addSatellite(new TeleportingSatellite(satelliteId, height, position));
+                allEntities.add(new TeleportingSatellite(satelliteId, position, height));
                 break;
             }
             case ("RelaySatellite"): {
-                dataSS.addSatellite(new RelaySatellite(satelliteId, height, position));
+                allEntities.add(new RelaySatellite(satelliteId, position, height));
                 break;
             }
         }
     }
 
     public void removeSatellite(String satelliteId) {
-        dataSS.removeSatelliteById(satelliteId);
+        allEntities.removeIf(entity -> entity.getId().equals(satelliteId));
     }
 
     public List<String> listDeviceIds() {
-        return dataSS.getDevices().stream().map(device -> device.getDeviceId()).collect(Collectors.toList());
+        return allEntities.stream()
+                .filter(entity -> entity instanceof Device)
+                .map(entity -> entity.getId())
+                .collect(Collectors.toList());
     }
 
     public List<String> listSatelliteIds() {
-        return dataSS.getSatellites().stream().map(satellite -> satellite.getSatelliteId()).collect(Collectors.toList());
+        return allEntities.stream()
+                .filter(entity -> entity instanceof Satellite)
+                .map(entity -> entity.getId())
+                .collect(Collectors.toList());
     }
 
     public void addFileToDevice(String deviceId, String filename, String content) {
-        dataSS.addFileToDevice(deviceId, filename, content);
+        for (Entity entity : allEntities) {
+            if (entity.getId().equals(deviceId)) {
+                fileCentre.addFileInstantly(entity, new File(filename, content));
+            }
+        };
     }
 
     public EntityInfoResponse getInfo(String id) {
-        Satellite sat = dataSS.getSatelliteById(id);
-        Device dev = dataSS.getDeviceById(id);
-        if (sat != null) {
-            return new EntityInfoResponse(sat.getSatelliteId(),
-                    sat.getPosition(),
-                    sat.getHeight(),
-                    sat.getType());
-        } else {
-            Map<String, FileInfoResponse> files = new HashMap<>();
-            dev.getFiles().stream().forEach(file -> files.put(file.getFilename(),
-                    new FileInfoResponse(file.getFilename(),
-                            file.getContent(),
-                            file.getFileSize(),
-                            file.getIsTransferred())));
-            return new EntityInfoResponse(dev.getDeviceId(),
-                    dev.getPosition(),
-                    MathsHelper.RADIUS_OF_JUPITER,
-                    dev.getType(),
-                    files);
+        Entity entity = allEntities.stream()
+                .filter(myEntity -> myEntity.getId().equals(id))
+                .findFirst()
+                .orElse(null);
+        Map<String, FileInfoResponse> files = new HashMap<>();
+        for (File file : fileCentre.getFiles(entity)) {
+            files.put(file.getFileName(),
+            new FileInfoResponse(file.getFileName(), file.getContent(), file.getSize(), file.isTransferred()));
         }
+        return new EntityInfoResponse(entity.getId(), entity.getPosition(), entity.getHeight(), entity.getType(), files);
     }
 
     public void simulate() {
         // TODO: Task 2a)
-        //This should run the simulation for a single minute.
-        // This will include moving satellites around and later on transferring files between satellites and devices.dataSS.getSatellites();
-        dataSS.getSatellites().forEach(satellite -> satellite.move());
+        allEntities.stream().filter(entity -> entity instanceof Movement).forEach(entity -> ((Movement) entity).move());
+        fileCentre.updateTransfer(allEntities);
     }
 
     /**
@@ -112,34 +107,14 @@ public class BlackoutController {
     }
 
     public List<String> communicableEntitiesInRange(String id) {
-        Satellite satellite = dataSS.getSatelliteById(id);
-        Device device = dataSS.getDeviceById(id);
-        if (satellite != null) {
-            var communicable = satellite.getAllCommunicableEntities(dataSS.getSatellites(), dataSS.getDevices());
-            var communicableAsList = communicable.satellites
-                    .stream()
-                    .map(mySatellite -> mySatellite.getSatelliteId())
-                    .collect(Collectors.toList());
-            communicableAsList.addAll(
-                    communicable.devices
-                            .stream()
-                            .map(myDevice -> myDevice.getDeviceId())
-                            .collect(Collectors.toList())
-            );
-            return communicableAsList;
-        } else {
-            // No need to print out devices as devices cannot connect to other devices no matter what
-            var communicable = device.getAllCommunicableEntities(dataSS.getSatellites(), dataSS.getDevices());
-            var communicableAsList = communicable.satellites
-                    .stream()
-                    .map(mySatellite -> mySatellite.getSatelliteId())
-                    .collect(Collectors.toList());
-            return communicableAsList;
-        }
+        Entity entity = allEntities.stream().filter(myEntity -> myEntity.getId().equals(id)).findFirst().orElse(null);
+        return entity.getAllCommunicableEntities(allEntities).stream().map(myEntity -> myEntity.getId()).collect(Collectors.toList());
     }
 
     public void sendFile(String fileName, String fromId, String toId) throws FileTransferException {
-        // TODO: Task 2 c)
+        Entity fromEntity = allEntities.stream().filter(entity -> entity.getId().equals(fromId)).findFirst().orElse(null);
+        Entity toEntity = allEntities.stream().filter(entity -> entity.getId().equals(toId)).findFirst().orElse(null);
+        fileCentre.sendFile(fromEntity, toEntity, fileName);
     }
 
     public void createDevice(String deviceId, String type, Angle position, boolean isMoving) {
